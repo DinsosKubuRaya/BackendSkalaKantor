@@ -32,6 +32,8 @@ func ConnectDatabase() {
 		log.Fatal("❌ Gagal koneksi database:", err)
 	}
 
+	registerQueryProtector(database)
+
 	DB = database
 
 	log.Println("✅ Database connected successfully")

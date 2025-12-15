@@ -7,6 +7,8 @@ import (
 	"BackendKantorDinsos/infrastructure/database"
 	"BackendKantorDinsos/infrastructure/routes"
 
+	"BackendKantorDinsos/infrastructure/middleware"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,6 +21,9 @@ func main() {
 		&employee.Employee{},
 		&login.RefreshToken{},
 	)
+
+	r.Use(middleware.CORSMiddleware())
+	r.Use(middleware.XSSBlocker())
 
 	routes.EmployeeRoutes(r)
 	routes.AuthRoutes(r)
