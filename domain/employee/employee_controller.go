@@ -198,7 +198,7 @@ func GetAllEmployees(c *gin.Context) {
 // GET MY PROFILE (ME)
 // ============================================================================
 func GetMe(c *gin.Context) {
-	userID, exists := c.Get("userID")
+	employeeID, exists := c.Get("employeeID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "User tidak terautentikasi",
@@ -206,7 +206,7 @@ func GetMe(c *gin.Context) {
 		return
 	}
 
-	id, ok := userID.(string)
+	id, ok := employeeID.(string)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Format user ID tidak valid",
