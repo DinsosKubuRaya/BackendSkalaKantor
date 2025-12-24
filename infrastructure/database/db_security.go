@@ -11,11 +11,11 @@ import (
 
 // pola yang dianggap berbahaya
 var forbiddenPatterns = []*regexp.Regexp{
-	regexp.MustCompile(`(?i);`),        // pemisah perintah
-	regexp.MustCompile(`(?i)--`),       // komentar SQL
-	regexp.MustCompile(`(?i)/\*.*\*/`), // komentar block
-	regexp.MustCompile(`(?i)\bdrop\b`), // DROP
-	// regexp.MustCompile(`(?i)\balter\b`),             // ALTER
+	regexp.MustCompile(`(?i);`),                     // pemisah perintah
+	regexp.MustCompile(`(?i)--`),                    // komentar SQL
+	regexp.MustCompile(`(?i)/\*.*\*/`),              // komentar block
+	regexp.MustCompile(`(?i)\bdrop\b`),              // DROP
+	regexp.MustCompile(`(?i)\balter\b`),             // ALTER
 	regexp.MustCompile(`(?i)\btruncate\b`),          // TRUNCATE
 	regexp.MustCompile(`(?i)\bdelete\b`),            // DELETE tanpa where
 	regexp.MustCompile(`(?i)\bunion\b.*\bselect\b`), // UNION SELECT
