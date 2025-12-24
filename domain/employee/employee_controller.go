@@ -22,54 +22,6 @@ type SearchEmployeeRequest struct {
 	Name string `form:"name" binding:"required"`
 }
 
-func CreateAdminOnce(c *gin.Context) {
-	var count int64
-	database.DB.Model(&Employee{}).
-		Where("role = ?", "admin").
-		Count(&count)
-
-	if count > 0 {
-		c.JSON(http.StatusForbidden, gin.H{
-			"error": "Admin sudah ada",
-		})
-		return
-	}
-
-	var req CreateEmployeeRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid form-data: " + err.Error(),
-		})
-		return
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to hash password",
-		})
-		return
-	}
-
-	admin := Employee{
-		Name:         req.Name,
-		Username:     req.Username,
-		PasswordHash: string(hashedPassword),
-		Role:         "admin",
-	}
-
-	if err := database.DB.Create(&admin).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Gagal membuat admin",
-		})
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "Admin pertama berhasil dibuat",
-	})
-}
-
 // ============================================================================
 // CREATE
 // ============================================================================
