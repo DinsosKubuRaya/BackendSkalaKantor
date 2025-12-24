@@ -33,7 +33,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "7000" // fallback lokal
+		port = "7000"
 	}
 
 	log.Println("✅ Server berjalan di port", port)
