@@ -15,25 +15,24 @@ var DB *gorm.DB
 func ConnectDatabase() {
 	_ = godotenv.Load()
 
-	rawURL := os.Getenv("MYSQL_URL")
-	if rawURL == "" {
+	mysqlURL := os.Getenv("MYSQL_URL")
+	if mysqlURL == "" {
 		log.Fatal("❌ MYSQL_URL tidak ditemukan")
 	}
 
-	// mysql://user:pass@host:port/db
-	dsn := strings.Replace(rawURL, "mysql://", "", 1)
-	dsn = strings.Replace(dsn, "@", "@tcp(", 1)
-	dsn = strings.Replace(dsn, "/", ")/", 1)
+	// mysql://user:pass@host:port/dbname
+	mysqlURL = strings.TrimPrefix(mysqlURL, "mysql://")
 
-	dsn += "?charset=utf8mb4&parseTime=True&loc=Local"
+	// tambahkan parameter wajib gorm
+	dsn := mysqlURL + "?charset=utf8mb4&parseTime=True&loc=Local"
 
-	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("❌ Gagal koneksi database:", err)
 	}
 
-	registerQueryProtector(database)
-	DB = database
+	registerQueryProtector(db)
 
-	log.Println("✅ Database Railway MySQL terkoneksi")
+	DB = db
+	log.Println("✅ Database connected using MYSQL_URL")
 }
