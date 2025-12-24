@@ -3,6 +3,8 @@ package main
 import (
 	"BackendKantorDinsos/domain/employee"
 	"BackendKantorDinsos/domain/login"
+	"log"
+	"os"
 
 	"BackendKantorDinsos/infrastructure/database"
 	"BackendKantorDinsos/infrastructure/routes"
@@ -29,5 +31,13 @@ func main() {
 	routes.AuthRoutes(r)
 	routes.DocumentStaffRoutes(r)
 
-	r.Run(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "7000" // fallback lokal
+	}
+
+	log.Println("✅ Server berjalan di port", port)
+	if err := r.Run(":" + port); err != nil {
+		log.Fatal("Gagal menjalankan server:", err)
+	}
 }

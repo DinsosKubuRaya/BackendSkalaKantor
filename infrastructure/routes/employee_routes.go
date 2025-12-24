@@ -8,6 +8,9 @@ import (
 )
 
 func EmployeeRoutes(r *gin.Engine) {
+
+	r.POST("/api/setup/admin", employeeController.CreateAdminOnce)
+
 	emp := r.Group("/api/employee", middleware.AuthMiddleware())
 	{
 		adminGroup := emp.Group("")

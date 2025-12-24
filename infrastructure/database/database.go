@@ -1,9 +1,9 @@
 package database
 
 import (
-	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
@@ -13,28 +13,26 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("⚠️  File .env tidak ditemukan. Menggunakan environment system...")
+	_ = godotenv.Load()
+
+	mysqlURL := os.Getenv("MYSQL_URL")
+	if mysqlURL == "" {
+		log.Fatal("❌ MYSQL_URL tidak ditemukan")
 	}
 
-	dbUser := os.Getenv("DB_USER")
-	dbPass := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbName := os.Getenv("DB_NAME")
+	// mysql://user:pass@host:port/dbname
+	mysqlURL = strings.TrimPrefix(mysqlURL, "mysql://")
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		dbUser, dbPass, dbHost, dbName,
-	)
+	// tambahkan parameter wajib gorm
+	dsn := mysqlURL + "?charset=utf8mb4&parseTime=True&loc=Local"
 
-	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("❌ Gagal koneksi database:", err)
 	}
 
-	registerQueryProtector(database)
+	registerQueryProtector(db)
 
-	DB = database
-
-	log.Println("✅ Database connected successfully")
+	DB = db
+	log.Println("✅ Database connected using MYSQL_URL")
 }

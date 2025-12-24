@@ -16,11 +16,58 @@ type CreateEmployeeRequest struct {
 	Name     string `form:"name" binding:"required"`
 	Username string `form:"username" binding:"required"`
 	Password string `form:"password" binding:"required"`
-	Role     string `form:"role"`
 }
 
 type SearchEmployeeRequest struct {
 	Name string `form:"name" binding:"required"`
+}
+
+func CreateAdminOnce(c *gin.Context) {
+	var count int64
+	database.DB.Model(&Employee{}).
+		Where("role = ?", "admin").
+		Count(&count)
+
+	if count > 0 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "Admin sudah ada",
+		})
+		return
+	}
+
+	var req CreateEmployeeRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid form-data: " + err.Error(),
+		})
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to hash password",
+		})
+		return
+	}
+
+	admin := Employee{
+		Name:         req.Name,
+		Username:     req.Username,
+		PasswordHash: string(hashedPassword),
+		Role:         "admin",
+	}
+
+	if err := database.DB.Create(&admin).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Gagal membuat admin",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Admin pertama berhasil dibuat",
+	})
 }
 
 // ============================================================================
@@ -36,13 +83,6 @@ func CreateEmployee(c *gin.Context) {
 		return
 	}
 
-	if req.Name == "" || req.Username == "" || req.Password == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "name, username, dan password wajib diisi",
-		})
-		return
-	}
-
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -51,15 +91,11 @@ func CreateEmployee(c *gin.Context) {
 		return
 	}
 
-	if req.Role == "" {
-		req.Role = "staff"
-	}
-
 	employee := Employee{
 		Name:         req.Name,
 		Username:     req.Username,
 		PasswordHash: string(hashedPassword),
-		Role:         req.Role,
+		Role:         "staff", // 🔒 HARD-CODE
 	}
 
 	if err := database.DB.Create(&employee).Error; err != nil {
@@ -70,7 +106,7 @@ func CreateEmployee(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message":  "Employee created successfully",
+		"message":  "Staff berhasil dibuat",
 		"employee": employee,
 	})
 }
